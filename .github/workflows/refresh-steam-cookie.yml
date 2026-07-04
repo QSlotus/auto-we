@@ -8,6 +8,10 @@ on:
   # 允许手动触发
   workflow_dispatch:
 
+# 关键：赋予 push 权限
+permissions:
+  contents: write
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
