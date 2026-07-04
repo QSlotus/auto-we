@@ -1,0 +1,49 @@
+name: Refresh Steam Cookie
+
+on:
+  # 每 12 小时自动运行一次（Steam cookie 通常有效期约 1-2 天）
+  schedule:
+    - cron: "0 */12 * * *"
+
+  # 允许手动触发
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    # 指定 environment（可选，用于更严格的权限控制）
+    # environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install requests cryptography
+
+      - name: Refresh and encrypt Steam cookie
+        env:
+          STEAM_REFRESH_COOKIE: ${{ secrets.STEAM_REFRESH_COOKIE }}
+          COOKIE_ENCRYPT_KEY: ${{ secrets.COOKIE_ENCRYPT_KEY }}
+        run: |
+          cd auto
+          python refresh_steam.py
+
+      - name: Commit encrypted cookie file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add auto/cookie.enc.json
+          if git diff --cached --quiet; then
+            echo "无变化，跳过提交"
+          else
+            git commit -m "chore: update steam cookie [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+            git push
+          fi
