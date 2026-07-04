@@ -33,7 +33,6 @@ jobs:
           STEAM_REFRESH_COOKIE: ${{ secrets.STEAM_REFRESH_COOKIE }}
           COOKIE_ENCRYPT_KEY: ${{ secrets.COOKIE_ENCRYPT_KEY }}
         run: |
-          cd auto
           python refresh_steam.py
 
       - name: Commit encrypted cookie file
